@@ -33,7 +33,7 @@ public class PhoneNumberVerificationController {
 
                             NewFactor.FactorTypes.TOTP).setConfigCodeLength(6).setConfigTimeStep(30)
                     .create();
-        System.out.println(createNewFactorAuthentication.toString());
+        System.out.println(createNewFactorAuthentication.toString())git;
             String response = String.valueOf(createNewFactorAuthentication.getBinding());
             System.out.println(response);
 
