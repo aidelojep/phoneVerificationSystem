@@ -26,7 +26,7 @@ import static com.twilio.example.ValidationExample.AUTH_TOKEN;
 public class PhoneNumberVerificationController {
 
     @GetMapping(value = "/generateTOTP")
-    public ResponseEntity<String> generateTOTP(){
+    public ResponseEntity<String> generateTOTP() {
 
         Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));
 
@@ -38,23 +38,29 @@ public class PhoneNumberVerificationController {
 
         System.out.println(verification.getStatus());
 
-      log.info("TOTP has been successfully generated, and awaits your verification {}", LocalDateTime.now());
+        log.info("TOTP has been successfully generated, and awaits your verification {}", LocalDateTime.now());
 
-       return new ResponseEntity<>("Your TOTP has been sent to your verified phone number", HttpStatus.OK);
+        return new ResponseEntity<>("Your TOTP has been sent to your verified phone number", HttpStatus.OK);
     }
 
     @GetMapping("/verifyTOTP")
-    public ResponseEntity<String> verifyUserTOTP(){
+    public ResponseEntity<?> verifyUserTOTP() {
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-        VerificationCheck verificationCheck = VerificationCheck.creator(
-                        "VA954765dc76826bc3895c459da6744b6f")
-                .setTo("+2348102578725")
-                .setCode("486578")
-                .create();
 
-        System.out.println(verificationCheck.getStatus());
+        try {
 
-        return new ResponseEntity<>("This user’s verification has been completed successfully", HttpStatus.OK);
+            VerificationCheck verificationCheck = VerificationCheck.creator(
+                            "VA954765dc76826bc3895c459da6744b6f")
+                    .setTo("+2348102578725")
+                    .setCode("486578")
+                    .create();
+
+            System.out.println(verificationCheck.getStatus());
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Verification failed.", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>("This user's verification has been completed successfully", HttpStatus.OK);
+
     }
-
 }
