@@ -1,7 +1,10 @@
 package com.twilio.phonenumber_verification_system.controller;
 import com.twilio.Twilio;
+import com.twilio.rest.verify.v2.service.Verification;
+import com.twilio.rest.verify.v2.service.VerificationCheck;
+import com.twilio.type.PhoneNumber;
 import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.rest.lookups.v1.PhoneNumber;
+//import com.twilio.rest.lookups.v1.PhoneNumber;
 import com.twilio.rest.verify.v2.service.entity.Factor;
 import com.twilio.rest.verify.v2.service.entity.NewFactor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 
+import static com.twilio.example.ValidationExample.ACCOUNT_SID;
+import static com.twilio.example.ValidationExample.AUTH_TOKEN;
 
 
 @RestController
@@ -20,43 +25,36 @@ import java.time.LocalDateTime;
 @Slf4j
 public class PhoneNumberVerificationController {
 
-    @GetMapping(value = "/createTOTP")
-    public ResponseEntity<String> createTOTP(){
+    @GetMapping(value = "/generateTOTP")
+    public ResponseEntity<String> generateTOTP(){
 
         Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));
 
+        Verification verification = Verification.creator(
+                        "VA954765dc76826bc3895c459da6744b6f",
+                        "+2348102578725",
+                        "sms")
+                .create();
 
-            NewFactor createNewFactorAuthentication = NewFactor.creator(
-                            "VAbe46ca1c655070b77d11c2798f7cccf1",
-                            "ff483d1ff591898a9942916050d2ca3f",
-                            "PEROZON'S VERIFICATION SERVICE",
+        System.out.println(verification.getStatus());
 
-                            NewFactor.FactorTypes.TOTP).setConfigCodeLength(6).setConfigTimeStep(30)
-                    .create();
-        System.out.println(createNewFactorAuthentication.toString())git;
-            String response = String.valueOf(createNewFactorAuthentication.getBinding());
-            System.out.println(response);
+      log.info("TOTP has been successfully generated, and awaits your verification {}", LocalDateTime.now());
 
-        //Message.creator(new PhoneNumber("+2348102578725"), new PhoneNumber("+19896629625"), "Hello from Perozon").create();
-      log.info("TOTP has been successfully generated {}", LocalDateTime.now());
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+       return new ResponseEntity<>("Your TOTP has been sent to your verified phone number", HttpStatus.OK);
     }
 
     @GetMapping("/verifyTOTP")
     public ResponseEntity<String> verifyUserTOTP(){
+        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+        VerificationCheck verificationCheck = VerificationCheck.creator(
+                        "VA954765dc76826bc3895c459da6744b6f")
+                .setTo("+2348102578725")
+                .setCode("486578")
+                .create();
 
-        Factor factor = Factor.updater(
-                        "VAbe46ca1c655070b77d11c2798f7cccf1",
-                        "ff483d1ff591898a9942916050d2ca3f",
-                        "AQRQUQ2E53S5PSPIZX4URFL3AWOCPP4X")
-                .setAuthPayload("12345").update();
+        System.out.println(verificationCheck.getStatus());
 
-        System.out.println(factor.getStatus());
-
-        return new ResponseEntity<>("userVerification Done", HttpStatus.OK);
+        return new ResponseEntity<>("This user’s verification has been completed successfully", HttpStatus.OK);
     }
-
-
 
 }
